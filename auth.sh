@@ -65,20 +65,20 @@ shift $(($OPTIND - 1))
 if [ $# -eq 0 ] || [[ $1 == 'login' ]]; then
     # 如果账号密码为空，则从文件里读取
     if [[ ${USERNAME} == '' ]] || [[ ${PASSWORD} == '' ]]; then
-        cat -s ${USERSFILE} | while read l1; do
+        while read l1; do
             USERNAME=`echo -n $l1 | awk '{ print $1 }'`
             PASSWORD=`echo -n $l1 | awk '{ print $2 }'`
             say_out "正在尝试登录 ${USERNAME} ${PASSWORD}"
             PASSWORD=`md5_hash ${PASSWORD}`
             # 如果登录成功，则退出循环，并记录账号密码
             state=`submit 'do_login' ${USERNAME} ${PASSWORD}`
-            say_out "${state}"
+            say_out "state: ${state}"
             if [[ `echo "${state}" | grep '成功'` ]]; then
-                echo "${state}"
+                echo "${USERNAME} 登录成功"
                 echo "${USERNAME} ${PASSWORD}" > ${STATEFILE}
                 exit
             fi
-        done
+        done < ${USERSFILE}
         echo "所有账号登录失败"
     else
         say_out "正在尝试登录 ${USERNAME} ${PASSWORD}"
